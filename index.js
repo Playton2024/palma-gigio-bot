@@ -23,3 +23,37 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor activo en el puerto ${PORT}`);
 });
+const fs = require('fs');
+const csv = require('csv-parser');
+
+bot.onText(/\/resumen/, (msg) => {
+  const chatId = msg.chat.id;
+  const resumen = [];
+
+  fs.createReadStream('data.csv')
+    .pipe(csv())
+    .on('data', (row) => {
+      const lote = row['Lote'] || row['lote'];
+      const peso = parseFloat(row['Peso total'] || row['peso total'] || '0');
+      resumen.push({ lote, peso });
+    })
+    .on('end', () => {
+      const resumenPorLote = resumen.reduce((acc, row) => {
+        if (!acc[row.lote]) acc[row.lote] = 0;
+        acc[row.lote] += row.peso;
+        return acc;
+      }, {});
+
+      let mensaje = '📊 *Resumen de Producción – Julio*\n';
+      let total = 0;
+
+      for (const [lote, peso] of Object.entries(resumenPorLote)) {
+        mensaje += `✔️ ${lote}: ${peso.toFixed(2)} kg\n`;
+        total += peso;
+      }
+
+      mensaje += `💼 *Total:* ${total.toFixed(2)} kg`;
+
+      bot.sendMessage(chatId, mensaje, { parse_mode: 'Markdown' });
+    });
+});

@@ -62,3 +62,38 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor activo en el puerto ${PORT}`);
 });
+bot.onText(/\/pendientes/, (msg) => {
+  const chatId = msg.chat.id;
+  const pendientes = [];
+
+  fs.createReadStream('data.csv')
+    .pipe(csv())
+    .on('data', (row) => {
+      if (row['Pagado'] && row['Pagado'].toLowerCase() === 'no') {
+        pendientes.push({
+          fecha: row['Fecha'],
+          lote: row['Lote'],
+          jornales: row['Jornales'],
+          corte: row['Corte'],
+          transporte: row['Transporte']
+        });
+      }
+    })
+    .on('end', () => {
+      if (pendientes.length === 0) {
+        bot.sendMessage(chatId, '✅ No hay pagos pendientes. Todo está al día.');
+        return;
+      }
+
+      let mensaje = '💸 *Pagos pendientes por lote:*\n';
+
+      pendientes.forEach((p) => {
+        mensaje += `\n📅 ${p.fecha} – ${p.lote}\n`;
+        mensaje += `🔻 Jornales: $${parseInt(p.jornales).toLocaleString()}\n`;
+        mensaje += `🔻 Corte: $${parseInt(p.corte).toLocaleString()}\n`;
+        mensaje += `🔻 Transporte: $${parseInt(p.transporte).toLocaleString()}\n`;
+      });
+
+      bot.sendMessage(chatId, mensaje, { parse_mode: 'Markdown' });
+    });
+});

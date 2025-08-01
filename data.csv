@@ -1,5 +1,5 @@
-Fecha,Lote,Gajos,Kg promedio,Peso total
-2024-07-01,Fortuna 1,590,17.0,10030
-2024-07-01,Fortuna,550,12.0,6580
-2024-07-15,Fortuna 1,610,16.5,10065
-2024-07-15,Fortuna,570,11.5,6555
+Fecha,Lote,Gajos,Kg promedio,Peso total,Jornales,Corte,Transporte,Pagado
+2024-07-01,Fortuna 1,590,17.0,10030,300000,200000,100000,No
+2024-07-01,Fortuna,550,12.0,6580,280000,190000,80000,Sí
+2024-07-15,Fortuna 1,610,16.5,10065,310000,205000,105000,No
+2024-07-15,Fortuna,570,11.5,6555,290000,195000,85000,Sí

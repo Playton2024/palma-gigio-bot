@@ -10,6 +10,11 @@ const bot = new TelegramBot(token);
 const app = express();
 app.use(bodyParser.json());
 
+// Endpoint raíz para mantener Railway activo
+app.get("/", (req, res) => {
+  res.send("Bot de palma activo 🌴");
+});
+
 app.post(`/bot${token}`, (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);

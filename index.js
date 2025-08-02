@@ -17,14 +17,14 @@ app.post(`/bot${token}`, (req, res) => {
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, "🌴 ¡Hola Gigio! Soy tu asistente de palma.
+  bot.sendMessage(chatId, `🌴 ¡Hola Gigio! Soy tu asistente de palma.
 
 Puedes escribirme:
 /resumen – para ver la producción
 /pendientes – para saber qué está pendiente por pagar
 /costos – para conocer los costos acumulados
 
-Estoy listo para ayudarte 💪");
+Estoy listo para ayudarte 💪`);
 });
 
 bot.onText(/\/resumen/, (msg) => {
@@ -45,9 +45,7 @@ bot.onText(/\/resumen/, (msg) => {
         return acc;
       }, {});
 
-      let mensaje = '🌾 *Producción acumulada*
-Hola Gigio, esto es lo que llevas cosechado:
-';
+      let mensaje = '🌾 *Producción acumulada*\nHola Gigio, esto es lo que llevas cosechado:\n';
       let total = 0;
 
       for (const [lote, peso] of Object.entries(resumenPorLote)) {
@@ -55,8 +53,7 @@ Hola Gigio, esto es lo que llevas cosechado:
         total += peso;
       }
 
-      mensaje += `
-📦 *Total cosechado:* ${total.toLocaleString()} kg\n¡Vamos bien este mes! 💪`;
+      mensaje += `\n📦 *Total cosechado:* ${total.toLocaleString()} kg\n¡Vamos bien este mes! 💪`;
 
       bot.sendMessage(chatId, mensaje, { parse_mode: 'Markdown' });
     });
@@ -85,19 +82,13 @@ bot.onText(/\/pendientes/, (msg) => {
         return;
       }
 
-      let mensaje = '💸 *Pagos pendientes por lote:*
-';
+      let mensaje = '💸 *Pagos pendientes por lote:*\n';
 
       pendientes.forEach((p) => {
-        mensaje += `
-📅 ${p.fecha} – ${p.lote}
-`;
-        mensaje += `🔻 Jornales: $${parseInt(p.jornales).toLocaleString()}
-`;
-        mensaje += `🔻 Corte: $${parseInt(p.corte).toLocaleString()}
-`;
-        mensaje += `🔻 Transporte: $${parseInt(p.transporte).toLocaleString()}
-`;
+        mensaje += `\n📅 ${p.fecha} – ${p.lote}\n`;
+        mensaje += `🔻 Jornales: $${parseInt(p.jornales).toLocaleString()}\n`;
+        mensaje += `🔻 Corte: $${parseInt(p.corte).toLocaleString()}\n`;
+        mensaje += `🔻 Transporte: $${parseInt(p.transporte).toLocaleString()}\n`;
       });
 
       bot.sendMessage(chatId, mensaje, { parse_mode: 'Markdown' });
@@ -123,9 +114,7 @@ bot.onText(/\/costos/, (msg) => {
       costosPorLote[lote] += jornales + corte + transporte;
     })
     .on('end', () => {
-      let mensaje = '📊 *Costos acumulados por lote:*
-Aquí están tus gastos acumulados, Gigio:
-';
+      let mensaje = '📊 *Costos acumulados por lote:*\nAquí están tus gastos acumulados, Gigio:\n';
       let total = 0;
 
       for (const [lote, costo] of Object.entries(costosPorLote)) {
@@ -133,8 +122,7 @@ Aquí están tus gastos acumulados, Gigio:
         total += costo;
       }
 
-      mensaje += `
-💰 *Total general:* $${total.toLocaleString()}`;
+      mensaje += `\n💰 *Total general:* $${total.toLocaleString()}`;
 
       bot.sendMessage(chatId, mensaje, { parse_mode: 'Markdown' });
     });
@@ -143,36 +131,4 @@ Aquí están tus gastos acumulados, Gigio:
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor activo en el puerto ${PORT}`);
-});
-bot.onText(/\/costos/, (msg) => {
-  const chatId = msg.chat.id;
-  const costosPorLote = {};
-
-  fs.createReadStream('data.csv')
-    .pipe(csv())
-    .on('data', (row) => {
-      const lote = row['Lote'];
-      const jornales = parseInt(row['Jornales'] || '0');
-      const corte = parseInt(row['Corte'] || '0');
-      const transporte = parseInt(row['Transporte'] || '0');
-
-      if (!costosPorLote[lote]) {
-        costosPorLote[lote] = 0;
-      }
-
-      costosPorLote[lote] += jornales + corte + transporte;
-    })
-    .on('end', () => {
-      let mensaje = '💼 *Costos acumulados por lote:*\n';
-      let total = 0;
-
-      for (const [lote, costo] of Object.entries(costosPorLote)) {
-        mensaje += `📍 ${lote} → $${costo.toLocaleString()}\n`;
-        total += costo;
-      }
-
-      mensaje += `\n💲 *Total general:* $${total.toLocaleString()}`;
-
-      bot.sendMessage(chatId, mensaje, { parse_mode: 'Markdown' });
-    });
 });

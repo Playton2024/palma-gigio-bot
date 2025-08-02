@@ -144,3 +144,35 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor activo en el puerto ${PORT}`);
 });
+bot.onText(/\/costos/, (msg) => {
+  const chatId = msg.chat.id;
+  const costosPorLote = {};
+
+  fs.createReadStream('data.csv')
+    .pipe(csv())
+    .on('data', (row) => {
+      const lote = row['Lote'];
+      const jornales = parseInt(row['Jornales'] || '0');
+      const corte = parseInt(row['Corte'] || '0');
+      const transporte = parseInt(row['Transporte'] || '0');
+
+      if (!costosPorLote[lote]) {
+        costosPorLote[lote] = 0;
+      }
+
+      costosPorLote[lote] += jornales + corte + transporte;
+    })
+    .on('end', () => {
+      let mensaje = '💼 *Costos acumulados por lote:*\n';
+      let total = 0;
+
+      for (const [lote, costo] of Object.entries(costosPorLote)) {
+        mensaje += `📍 ${lote} → $${costo.toLocaleString()}\n`;
+        total += costo;
+      }
+
+      mensaje += `\n💲 *Total general:* $${total.toLocaleString()}`;
+
+      bot.sendMessage(chatId, mensaje, { parse_mode: 'Markdown' });
+    });
+});
